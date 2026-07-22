@@ -86,12 +86,17 @@ Fedora 44 / PipeWire / Wayland): Media floss bidirektional, `codec=opus`,
 
 ## Bekannte offene Punkte / TODO
 
-- **`--device=all`** in `finish-args` ist aktuell die grobe Lösung für
-  `libjabra.so.1` (Jabra-Headset via USB-HID). Ungetestet, ob ein engeres
-  `--device=dri` + gezielte udev-Regel reicht. foundata hat das im
-  Container-Ansatz bewusst ausgeklammert (siehe deren "Gotchas" zu
-  Hotplug/udev/HID-Filterung) — plain Headset-Audio (auch Bluetooth)
-  funktioniert laut deren Tests ohne HID-Passthrough.
+- **`--device=all`** in `finish-args` deckt zwei Dinge ab: `libjabra.so.1`
+  (Jabra-Headset-Steuerung via USB-HID) und die Kamera für Videoanrufe.
+  Eine Einschränkung auf `--device=dri` würde die Kamera mit abschneiden;
+  der saubere Weg wäre `--device=camera` (Camera-Portal) plus eine gezielte
+  udev-/HID-Freigabe für Jabra. **Beides ist hier mangels Hardware nicht
+  testbar** — ohne Jabra-Headset lässt sich nicht verifizieren, was
+  `libjabra` an Zugriff wirklich braucht. Bleibt deshalb bewusst grob.
+  foundata hat die HID-Filterung im Container-Ansatz aus denselben Gründen
+  ausgeklammert (siehe deren "Gotchas" zu Hotplug/udev/HID-Filterung) —
+  plain Headset-Audio (auch Bluetooth) funktioniert laut deren Tests
+  ohne HID-Passthrough, nur die Geräteknöpfe/LEDs brauchen es.
 - **Lizenz** in `net.pascom.pascom_Client.metainfo.xml` ist aktuell nur
   `LicenseRef-proprietary` als Platzhalter — falls pascom irgendwo eine
   EULA/Lizenzdatei mitliefert, sollte die verlinkt werden. foundata weist
