@@ -244,11 +244,21 @@ wöchentlich das aktuelle Redirect-Ziel gegen die gepinnte URL. Weicht es ab,
 schlägt der Job mit dem Hinweis fehl, dass `url` und `sha256` aktualisiert
 werden müssen.
 
+## Entschieden: App-ID bleibt `net.pascom.pascom_Client`
+
+Die App-ID nutzt den Reverse-DNS-Namespace von pascom selbst. Das wäre ein
+Problem, sobald gebaute Pakete verteilt würden — passiert aber nicht, siehe
+Abschnitt zur Weitergabe in der [README](README.md#weitergabe): Jede Person
+baut selbst, der Download kommt von pascom. Bis sich daran etwas ändert oder
+pascom sich anders äußert, bleibt die ID.
+
+Sollte sie doch gewechselt werden, sind vier Stellen gleichzeitig betroffen:
+`app-id` im Manifest, Dateiname und `Icon=` der `.desktop`, Dateiname und
+`<id>` der `.metainfo.xml` sowie die `<launchable>`-Referenz. Nebenbei
+verschwände damit der einzige verbliebene `appstreamcli`-Hinweis
+(Großbuchstabe in der ID), der aktuell bewusst in Kauf genommen wird.
+
 ## Offene Punkte
 
-- **`--device=all` eingrenzen** — braucht ein Jabra-Headset zum Verifizieren.
-- **App-ID-Namespace** — `net.pascom.pascom_Client` nutzt den Reverse-DNS-Namespace
-  von pascom selbst. Bei einer Distribution ohne Autorisierung wäre ein eigener
-  Namespace sauberer; betroffen sind App-ID, `.desktop`-Dateiname,
-  `.metainfo.xml`-Dateiname und die `launchable`-Referenz. Nebenbei verschwände
-  damit der einzige verbliebene `appstreamcli`-Hinweis (Großbuchstabe in der ID).
+- **`--device=all` eingrenzen** — braucht ein Jabra-Headset zum Verifizieren,
+  siehe Abschnitt zu den Sandbox-Berechtigungen.
