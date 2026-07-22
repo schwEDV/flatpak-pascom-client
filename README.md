@@ -30,8 +30,17 @@ ungetestet. Rückmeldungen dazu sind willkommen.
 
 ## Installation
 
-Voraussetzung ist `flatpak` und `flatpak-builder` (Fedora:
-`sudo dnf install flatpak flatpak-builder`).
+Voraussetzung sind `flatpak` und `flatpak-builder`:
+
+| Distribution | Befehl |
+|---|---|
+| Fedora, RHEL, Rocky | `sudo dnf install flatpak flatpak-builder` |
+| Debian, Ubuntu, Mint | `sudo apt install flatpak flatpak-builder` |
+| Arch, Manjaro, EndeavourOS | `sudo pacman -S flatpak flatpak-builder` |
+| openSUSE | `sudo zypper install flatpak flatpak-builder` |
+
+Unter Debian und Ubuntu ist nach der Erstinstallation von Flatpak eine
+Neuanmeldung nötig, damit die Anwendung im Menü auftaucht.
 
 ```bash
 # Flathub-Remote und Runtime, falls noch nicht vorhanden
@@ -83,8 +92,10 @@ Beides im Manifest unter `url` und `sha256` eintragen, dann neu bauen.
   Tray-Icons nicht von sich aus; der laufende Client ist dann im Panel
   unsichtbar und taucht mangels Background-Portal auch nicht unter
   "Hintergrund-Apps" auf. Abhilfe: Paket
-  `gnome-shell-extension-appindicator` installieren, in den Erweiterungen
-  aktivieren, neu anmelden. Betrifft alle Tray-Anwendungen unter GNOME.
+  `gnome-shell-extension-appindicator` installieren (heißt auf den meisten
+  Distributionen so, sonst über [extensions.gnome.org](https://extensions.gnome.org/extension/615/appindicator-support/)),
+  in den Erweiterungen aktivieren, neu anmelden. Betrifft alle
+  Tray-Anwendungen unter GNOME.
   **KDE Plasma, Xfce und Cinnamon** zeigen das Icon direkt an.
 - **Unter X11 fehlt eventuell das Icon in der Taskleiste**, weil der Client
   dort eine andere Fensterklasse setzt. Unter Wayland stimmt es.
