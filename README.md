@@ -58,27 +58,34 @@ curl -sLO <redirect-ziel-url> && sha256sum pascom_Client-*-linux.tar.bz2
 `url` und `sha256` im Manifest eintragen. Der wöchentliche CI-Lauf vergleicht das
 Redirect-Ziel gegen die gepinnte URL und meldet neue Versionen.
 
+## Getestet: Softphone-Audio (PJSIP)
+
+Das war der kritische Punkt. Ein verwandtes Projekt
+([foundata/oci-pascom-client](https://github.com/foundata/oci-pascom-client),
+Container-Ansatz statt Flatpak) dokumentiert, dass ein früherer nativer
+Fedora-Versuch (Fedora 41, siehe [pascom-Forum-Thread](https://forum.pascom.net/t/stand-linux-client-abseits-von-ubuntu-hier-fedora/11687))
+genau hier gescheitert ist: Der Client hat **zwei getrennte Audio-Pfade** —
+Qt Multimedia (PulseAudio direkt, für Töne/Video) und PJSIP (ALSA **direkt**,
+für Softphone-Anrufe). PJSIP erwartet das Ubuntu-ALSA-Layout; auf nativem
+Fedora mit PipeWire schlug die Geräte-Enumeration fehl ("cannot find card",
+"no speakers have been detected").
+
+**Im Flatpak tritt das Problem nicht auf**, weil `org.freedesktop.Platform`
+die nötige ALSA→PulseAudio-Bridge bereits mitbringt:
+`libasound_module_pcm_pulse.so` plus `/etc/alsa/conf.d/99-pulseaudio-default.conf`,
+das `pcm.!default` *und* `ctl.!default` auf `type pulse` setzt. PJSIP öffnet
+`default` und landet damit automatisch beim Flatpak-PulseAudio-Socket
+(`PULSE_SERVER=unix:/run/flatpak/pulse/native`). Das Äquivalent zu Ubuntus
+`libasound2-plugins` ist also bereits da — eine eigene `asound.conf` ist nicht
+nötig.
+
+Verifiziert mit einem echten Softphone-Anruf (Client 120.R5110, Runtime 24.08,
+Fedora 44 / PipeWire / Wayland): Media floss bidirektional, `codec=opus`,
+268 rx / 269 tx Pakete, **0 Paketverlust in beide Richtungen**, MOS 4.21
+(R-Faktor 85.5), Jitter 18,7 ms rx / 5,5 ms tx. Keine PJSIP-Fehler im Log.
+
 ## Bekannte offene Punkte / TODO
 
-- **KRITISCH, noch nicht final verifiziert: Audio im PJSIP/Softphone-Pfad.**
-  Ein verwandtes Projekt ([foundata/oci-pascom-client](https://github.com/foundata/oci-pascom-client),
-  Container-Ansatz statt Flatpak) dokumentiert, dass ein früherer nativer
-  Fedora-Versuch (Fedora 41, siehe [pascom-Forum-Thread](https://forum.pascom.net/t/stand-linux-client-abseits-von-ubuntu-hier-fedora/11687))
-  an genau diesem Punkt gescheitert ist: Qt sah zwar Audiogeräte, aber der
-  eingebettete PJSIP-Telefonie-Stack öffnet ALSA-Devices **direkt** und
-  erwartet exakt das Ubuntu-ALSA/PulseAudio-Layout — auf Fedora (PipeWire +
-  abweichendes ALSA-Setup) schlug die Geräte-Enumeration fehl
-  ("cannot find card", "no speakers have been detected").
-  Der Client hat **zwei getrennte Audio-Pfade**: Qt Multimedia (PulseAudio
-  direkt, für Töne/Video) und PJSIP (ALSA direkt, für Softphone-Anrufe).
-  "Pulse als Device sichtbar" im Client bestätigt nur Pfad 1.
-  **Noch zu testen:** ein echter Anruf über das Softphone-Device (nicht
-  Click-to-Dial über ein anderes Endgerät) — Log auf `New audio devices added`
-  vs. `cannot find card`/`Could not create pj audio device` prüfen.
-  Falls das PJSIP-Problem im Flatpak auch auftritt, hilft vermutlich ein
-  Äquivalent zu Ubuntus `libasound2-plugins` (ALSA→PulseAudio-Bridge) plus
-  eine explizite `asound.conf`, die `default`/`ctl` auf die Bridge routet —
-  siehe deren "Audio"-Sektion in `DEVELOPMENT.md` als Referenzimplementierung.
 - **`--device=all`** in `finish-args` ist aktuell die grobe Lösung für
   `libjabra.so.1` (Jabra-Headset via USB-HID). Ungetestet, ob ein engeres
   `--device=dri` + gezielte udev-Regel reicht. foundata hat das im
