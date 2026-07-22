@@ -4,8 +4,9 @@
   <name>pascom Client</name>
   <summary>Unified-Communications-Client von pascom</summary>
   <metadata_license>CC0-1.0</metadata_license>
-  <!-- project_license: proprietäre Vendor-Software, kein Upstream-Lizenztext bekannt -->
-  <project_license>LicenseRef-proprietary</project_license>
+  <!-- Der Tarball enthält keine Lizenzdatei und keine EULA; pascom verweist für
+       Software ausschließlich auf die allgemeinen AGB. -->
+  <project_license>LicenseRef-proprietary=https://www.pascom.net/agb/</project_license>
   <description>
     <p>
       Community-Flatpak-Paketierung des proprietären pascom Clients
@@ -13,5 +14,13 @@
     </p>
   </description>
   <launchable type="desktop-id">net.pascom.pascom_Client.desktop</launchable>
+  <developer id="net.pascom">
+    <name>pascom GmbH &amp; Co. KG</name>
+  </developer>
+  <url type="homepage">https://www.pascom.net/</url>
+  <url type="bugtracker">https://github.com/schwEDV/flatpak-pascom-client/issues</url>
+  <releases>
+    <release version="120.R5110" date="2026-07-15"/>
+  </releases>
   <content_rating type="oars-1.1"/>
 </component>

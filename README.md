@@ -91,46 +91,47 @@ Fedora 44 / PipeWire / Wayland): Media floss bidirektional, `codec=opus`,
 268 rx / 269 tx Pakete, **0 Paketverlust in beide Richtungen**, MOS 4.21
 (R-Faktor 85.5), Jitter 18,7 ms rx / 5,5 ms tx. Keine PJSIP-Fehler im Log.
 
+## Getestet: Video und Bildschirmfreigabe
+
+Beides funktioniert — läuft aber **nicht in der Sandbox**: Der Client öffnet
+Konferenzen im Host-Browser, die Übertragung ist eine WebRTC-Webanwendung.
+Während eines laufenden Video-/Screenshare-Calls hatte kein Prozess `/dev/video*`
+geöffnet; im Log erscheinen `publishCameraStreamModel` und
+`publishScreenStreamModel` jeweils mit `peer connection state: connected`,
+Bild kam bei der Gegenstelle an.
+
+Konsequenz: Kamera- und ScreenCast-Portal-Zugriff der Sandbox sind für
+Videoanrufe **irrelevant** — der Browser bringt seine eigenen Berechtigungen mit.
+`--filesystem=xdg-run/pipewire-0` bleibt nur drin, weil es die Qt-Startmeldung
+`Failed to connect to pipewire instance` beseitigt; funktional hängt daran
+nichts Nachgewiesenes.
+
 ## Bekannte offene Punkte / TODO
 
-- **`--device=all`** in `finish-args` deckt zwei Dinge ab: `libjabra.so.1`
-  (Jabra-Headset-Steuerung via USB-HID) und die Kamera für Videoanrufe.
-  Eine Einschränkung auf `--device=dri` würde die Kamera mit abschneiden;
-  der saubere Weg wäre `--device=camera` (Camera-Portal) plus eine gezielte
-  udev-/HID-Freigabe für Jabra. **Beides ist hier mangels Hardware nicht
-  testbar** — ohne Jabra-Headset lässt sich nicht verifizieren, was
-  `libjabra` an Zugriff wirklich braucht. Bleibt deshalb bewusst grob.
+- **`--device=all`** in `finish-args` ist nur noch wegen `libjabra.so.1`
+  (Jabra-Headset-Steuerung via USB-HID) drin — die Kamera braucht es nicht,
+  weil Videoanrufe im Host-Browser laufen (siehe oben). Der saubere Weg wäre
+  eine gezielte udev-/HID-Freigabe statt `all`. **Mangels Jabra-Hardware nicht
+  testbar** — ohne das Headset lässt sich nicht verifizieren, welchen Zugriff
+  `libjabra` wirklich braucht. Bleibt deshalb bewusst grob.
   foundata hat die HID-Filterung im Container-Ansatz aus denselben Gründen
   ausgeklammert (siehe deren "Gotchas" zu Hotplug/udev/HID-Filterung) —
   plain Headset-Audio (auch Bluetooth) funktioniert laut deren Tests
   ohne HID-Passthrough, nur die Geräteknöpfe/LEDs brauchen es.
-- **Lizenz** in `net.pascom.pascom_Client.metainfo.xml` ist aktuell nur
-  `LicenseRef-proprietary` als Platzhalter — falls pascom irgendwo eine
-  EULA/Lizenzdatei mitliefert, sollte die verlinkt werden. foundata weist
-  zusätzlich darauf hin, dass das gebaute Image/Paket nicht weiterverteilt
-  werden darf, da nichts Proprietäres im Repo landen soll — relevant auch
-  für dieses Flatpak-Repo (Tarball wird zur Build-Zeit von pascom-Servern
-  geladen, nicht im Git-Repo gespeichert; `pascom_Client-*.tar.bz2` ist
-  in `.gitignore`).
+- **Weiterverteilung des gebauten Flatpaks.** Der Tarball enthält keine
+  Lizenzdatei, keine EULA und keinen Copyright-Hinweis; pascom verweist für
+  Software nur auf die allgemeinen [AGB](https://www.pascom.net/agb/). Die
+  metainfo referenziert diese jetzt als `LicenseRef-proprietary=<URL>`.
+  Da keine ausdrückliche Verteilungserlaubnis existiert, sollte das **gebaute
+  Bundle nicht weitergegeben** werden — das Repo enthält bewusst nur das
+  Manifest, der Tarball wird zur Build-Zeit von pascom-Servern geladen
+  (`pascom_Client-*.tar.bz2` steht in `.gitignore`). foundata kommt im
+  Container-Ansatz zum selben Schluss.
 - **`app-id: net.pascom.pascom_Client`** verwendet den Reverse-DNS-Namespace
   von pascom selbst. Falls die Distribution ohne Autorisierung von pascom
   erfolgt (z.B. eigenes Community-Repo statt Flathub), sollte das ggf. auf
   einen eigenen Namespace geändert werden (App-ID, `.desktop`-Dateiname,
   `.metainfo.xml`-Dateiname, `launchable`-Referenz betroffen).
-- **Screen-Sharing / Kamera ungetestet.** Beim Start meldet Qt
-  `Failed to connect to pipewire instance`. Der Zugriff auf `/dev/video*`
-  läuft über `--device=all` und sollte funktionieren, aber alles was Qt über
-  PipeWire macht (Screen-Capture via ScreenCast-Portal) ist ungeprüft.
-  Falls Bildschirmfreigabe gebraucht wird, fehlt vermutlich
-  `--talk-name=org.freedesktop.portal.ScreenCast` bzw. ein PipeWire-Socket.
-- **Browser-Login (OAuth-Callback):** foundata dokumentiert, dass der
-  Cloud-Login einen Browser öffnet und die Identity-Provider-Weiterleitung
-  auf `http://localhost:3008/...` geht (temporärer OAuth-Callback-Server im
-  Client). Im Flatpak-Sandbox-Kontext noch ungetestet, ob das mit den
-  aktuellen `finish-args` (`--share=network`) funktioniert oder ob zusätzlich
-  Portal-Handling für's Öffnen der Login-URL nötig ist (bei foundata über
-  `xdg-desktop-portal`/`org.freedesktop.portal.OpenURI` gelöst, siehe deren
-  "Browser-based login" Sektion).
 - **StartupWMClass**: Original-Client setzt je nach X11/Wayland eine
   unterschiedliche Fensterklasse (`pascom_Client` vs. `net.pascom.pascom_Client`),
   von foundata unabhängig bestätigt. Aktuelle `.desktop`-Datei geht von der
