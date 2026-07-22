@@ -135,6 +135,22 @@ ein führendes `*` matcht in fontconfig nicht über Verzeichnisgrenzen.
 | `--filesystem=xdg-run/pipewire-0` | unterdrückt eine Qt-Startmeldung, sonst ohne Funktion |
 | `--talk-name=org.freedesktop.Notifications` | Benachrichtigungen |
 | `--talk-name=org.kde.StatusNotifierWatcher` | Tray-Icon (siehe unten) |
+| `--talk-name=org.freedesktop.ScreenSaver`, `org.gnome.ScreenSaver` | Bildschirmsperre während Videoanrufen verhindern |
+| `--system-talk-name=org.freedesktop.login1` | `PrepareForSleep`, um nach dem Standby die SIP-Registrierung wiederherzustellen |
+
+Die Liste der D-Bus-Dienste ist vollständig: Im Binary tauchen genau
+`org.freedesktop.login1`, `org.freedesktop.Notifications`,
+`org.freedesktop.ScreenSaver` und `org.gnome.ScreenSaver` auf, dazu der
+StatusNotifierWatcher aus den Qt-Bibliotheken. `org.freedesktop.secrets` wird
+nicht verwendet, `com.canonical.AppMenu.Registrar` nur von Qt für globale
+Menüleisten — beides bleibt draußen.
+
+Ermitteln lässt sich das direkt am entpackten Build:
+
+```bash
+strings -n 8 build-dir/files/pascom_Client/pascom_Client \
+  | grep -oE "org\.(freedesktop|gnome|kde)\.[A-Za-z0-9.]+" | sort -u
+```
 
 Ohne `org.kde.StatusNotifierWatcher` erscheint **kein Tray-Icon**, und zwar
 ohne jede Fehlermeldung: Qt meldet das Item beim Watcher an, der Aufruf wird
