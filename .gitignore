@@ -4,6 +4,9 @@
 /repo/
 *.flatpak
 
+# Vendor-Tarball wird zur Build-Zeit geladen und gehoert nicht ins Repo
+pascom_Client-*.tar.bz2
+
 # lokale Editor-/Tool-Dateien
 .idea/
 .vscode/

@@ -4,8 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-  # Wöchentlich: schlägt fehl, sobald pascom eine neue Client-Version
-  # veröffentlicht (sha256 im Manifest ist gepinnt) -> Update-Kanarienvogel.
   schedule:
     - cron: "0 5 * * 1"
   workflow_dispatch:
@@ -24,3 +22,33 @@ jobs:
           bundle: pascom_Client.flatpak
           manifest-path: net.pascom.pascom_Client.json
           cache-key: flatpak-builder-${{ github.sha }}
+
+  # Das Manifest pinnt eine versionsspezifische Archiv-URL, der Build bricht
+  # also nicht mehr von selbst bei einem pascom-Update. Dieser Job meldet
+  # stattdessen, wenn upstream eine neuere Version bereitstellt.
+  upstream-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Redirect-Ziel gegen gepinnte URL pruefen
+        run: |
+          set -euo pipefail
+          # HEAD folgt dem Redirect still -> ranged GET, um Location zu sehen
+          latest=$(curl -sS -r 0-0 -o /dev/null -D- \
+            https://my.pascom.net/update/client/cloud/linux \
+            | tr -d '\r' | awk 'tolower($1) == "location:" { print $2 }')
+          pinned=$(grep -o 'https://download\.pascom\.net/[^"]*' net.pascom.pascom_Client.json)
+
+          echo "upstream: ${latest:-<keine Location-Header gefunden>}"
+          echo "gepinnt:  $pinned"
+
+          if [ -z "$latest" ]; then
+            echo "::warning::Redirect-Ziel nicht ermittelbar - Upstream-Schema evtl. geaendert"
+            exit 0
+          fi
+          if [ "$latest" != "$pinned" ]; then
+            echo "::error::Neue pascom-Version verfuegbar. url + sha256 im Manifest aktualisieren."
+            exit 1
+          fi
+          echo "Manifest ist auf dem aktuellen Stand."

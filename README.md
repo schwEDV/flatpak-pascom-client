@@ -41,19 +41,58 @@ neuere System-`libssl` gelinkt ist → `OPENSSL_3.2.0`/`3.5.0`-Symbolfehler.
   zur Laufzeit. Fix: eigenes `mit-krb5`-Modul baut MIT-Kerberos 1.21.3 aus
   Quellcode und installiert die Libs nach `/app/lib`.
 
+## Version aktualisieren
+
+Das Manifest pinnt eine konkrete Client-Version über die versionsspezifische
+Archiv-URL (Redirect-Ziel von `https://my.pascom.net/update/client/cloud/linux`).
+Aktuell: **120.R5110**. Für einen Versions-Bump:
+
+```bash
+# 1. aktuelles Redirect-Ziel ermitteln (HEAD folgt dem Redirect still, daher ranged GET)
+curl -s -r 0-0 -o /dev/null -D- https://my.pascom.net/update/client/cloud/linux | grep -i ^location
+
+# 2. Tarball ziehen und Hash bilden
+curl -sLO <redirect-ziel-url> && sha256sum pascom_Client-*-linux.tar.bz2
+```
+
+`url` und `sha256` im Manifest eintragen. Der wöchentliche CI-Lauf vergleicht das
+Redirect-Ziel gegen die gepinnte URL und meldet neue Versionen.
+
 ## Bekannte offene Punkte / TODO
 
+- **KRITISCH, noch nicht final verifiziert: Audio im PJSIP/Softphone-Pfad.**
+  Ein verwandtes Projekt ([foundata/oci-pascom-client](https://github.com/foundata/oci-pascom-client),
+  Container-Ansatz statt Flatpak) dokumentiert, dass ein früherer nativer
+  Fedora-Versuch (Fedora 41, siehe [pascom-Forum-Thread](https://forum.pascom.net/t/stand-linux-client-abseits-von-ubuntu-hier-fedora/11687))
+  an genau diesem Punkt gescheitert ist: Qt sah zwar Audiogeräte, aber der
+  eingebettete PJSIP-Telefonie-Stack öffnet ALSA-Devices **direkt** und
+  erwartet exakt das Ubuntu-ALSA/PulseAudio-Layout — auf Fedora (PipeWire +
+  abweichendes ALSA-Setup) schlug die Geräte-Enumeration fehl
+  ("cannot find card", "no speakers have been detected").
+  Der Client hat **zwei getrennte Audio-Pfade**: Qt Multimedia (PulseAudio
+  direkt, für Töne/Video) und PJSIP (ALSA direkt, für Softphone-Anrufe).
+  "Pulse als Device sichtbar" im Client bestätigt nur Pfad 1.
+  **Noch zu testen:** ein echter Anruf über das Softphone-Device (nicht
+  Click-to-Dial über ein anderes Endgerät) — Log auf `New audio devices added`
+  vs. `cannot find card`/`Could not create pj audio device` prüfen.
+  Falls das PJSIP-Problem im Flatpak auch auftritt, hilft vermutlich ein
+  Äquivalent zu Ubuntus `libasound2-plugins` (ALSA→PulseAudio-Bridge) plus
+  eine explizite `asound.conf`, die `default`/`ctl` auf die Bridge routet —
+  siehe deren "Audio"-Sektion in `DEVELOPMENT.md` als Referenzimplementierung.
 - **`--device=all`** in `finish-args` ist aktuell die grobe Lösung für
   `libjabra.so.1` (Jabra-Headset via USB-HID). Ungetestet, ob ein engeres
-  `--device=dri` + gezielte udev-Regel reicht.
-- **Archiv-Source zeigt auf `https://my.pascom.net/update/client/cloud/linux`**
-  (immer die neueste Version). Der `sha256` im Manifest ist gegen die Version
-  vom 22.07.2026 gepinnt (Hash `0fdf586a...`). **Bei jedem pascom-Update muss
-  der Hash manuell neu gezogen werden**, sonst schlägt der Build mit einem
-  Prüfsummenfehler fehl (das ist beabsichtigtes Verhalten, kein Bug).
+  `--device=dri` + gezielte udev-Regel reicht. foundata hat das im
+  Container-Ansatz bewusst ausgeklammert (siehe deren "Gotchas" zu
+  Hotplug/udev/HID-Filterung) — plain Headset-Audio (auch Bluetooth)
+  funktioniert laut deren Tests ohne HID-Passthrough.
 - **Lizenz** in `net.pascom.pascom_Client.metainfo.xml` ist aktuell nur
   `LicenseRef-proprietary` als Platzhalter — falls pascom irgendwo eine
-  EULA/Lizenzdatei mitliefert, sollte die verlinkt werden.
+  EULA/Lizenzdatei mitliefert, sollte die verlinkt werden. foundata weist
+  zusätzlich darauf hin, dass das gebaute Image/Paket nicht weiterverteilt
+  werden darf, da nichts Proprietäres im Repo landen soll — relevant auch
+  für dieses Flatpak-Repo (Tarball wird zur Build-Zeit von pascom-Servern
+  geladen, nicht im Git-Repo gespeichert; `pascom_Client-*.tar.bz2` ist
+  in `.gitignore`).
 - **`app-id: net.pascom.pascom_Client`** verwendet den Reverse-DNS-Namespace
   von pascom selbst. Falls die Distribution ohne Autorisierung von pascom
   erfolgt (z.B. eigenes Community-Repo statt Flathub), sollte das ggf. auf
@@ -61,11 +100,33 @@ neuere System-`libssl` gelinkt ist → `OPENSSL_3.2.0`/`3.5.0`-Symbolfehler.
   `.metainfo.xml`-Dateiname, `launchable`-Referenz betroffen).
 - **GTK3-Theme** (`QT_QPA_PLATFORMTHEME=gtk3`) ungetestet, ob die
   `org.gtk.Gtk3theme`-Extension automatisch mitkommt oder explizit als
-  `add-extension` deklariert werden muss.
+  `add-extension` deklariert werden muss. foundata nutzt stattdessen
+  `QT_QPA_PLATFORMTHEME=xdgdesktopportal` (der Client bringt dieses Qt-Plugin
+  mit) für Datei-Dialoge/Login-Browser über den Portal-Mechanismus — evtl.
+  die bessere Wahl auch fürs Flatpak, statt GTK3.
+- **Browser-Login (OAuth-Callback):** foundata dokumentiert, dass der
+  Cloud-Login einen Browser öffnet und die Identity-Provider-Weiterleitung
+  auf `http://localhost:3008/...` geht (temporärer OAuth-Callback-Server im
+  Client). Im Flatpak-Sandbox-Kontext noch ungetestet, ob das mit den
+  aktuellen `finish-args` (`--share=network`) funktioniert oder ob zusätzlich
+  Portal-Handling für's Öffnen der Login-URL nötig ist (bei foundata über
+  `xdg-desktop-portal`/`org.freedesktop.portal.OpenURI` gelöst, siehe deren
+  "Browser-based login" Sektion).
 - **StartupWMClass**: Original-Client setzt je nach X11/Wayland eine
   unterschiedliche Fensterklasse (`pascom_Client` vs. `net.pascom.pascom_Client`),
-  siehe `create-starter.sh` im Original-Tarball. Aktuelle `.desktop`-Datei
-  geht von der Wayland-Variante aus — ggf. unter X11 kein Icon im Panel.
+  von foundata unabhängig bestätigt. Aktuelle `.desktop`-Datei geht von der
+  Wayland-Variante aus — ggf. unter X11 kein Icon im Panel.
+
+## Referenz
+
+[foundata/oci-pascom-client](https://github.com/foundata/oci-pascom-client) —
+verwandtes Projekt, das denselben Client stattdessen in einem Ubuntu-24.04-
+Podman-Container paketiert (bewusste Entscheidung gegen Flatpak wegen der
+Bundled/System-Linking-Fragilität). Deren `DEVELOPMENT.md` ist eine sehr
+detaillierte Analyse des Tarball-Inhalts, aller System-Abhängigkeiten,
+Audio-/Display-/Portal-/Networking-Design-Entscheidungen und Gotchas —
+lohnt sich bei jedem Problem hier als erste Anlaufstelle zum Gegenlesen,
+auch wenn der Lösungsweg (Container vs. Flatpak) ein anderer ist.
 
 ## Dateien
 

@@ -56,7 +56,7 @@
             "sources": [
                 {
                     "type": "archive",
-                    "url": "https://my.pascom.net/update/client/cloud/linux",
+                    "url": "https://download.pascom.net/release-archive/client/cloud/pascom_Client-120.R5110-linux.tar.bz2",
                     "sha256": "0fdf586a4a7d8af3c28296f21a76b7539857806d66ba52953d30840af2df8486"
                 },
                 {
