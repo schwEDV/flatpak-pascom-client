@@ -15,6 +15,11 @@ export QT_PLATFORMTHEME="${QT_PLATFORMTHEME:-xdgdesktopportal}"
 # unsichtbar (siehe Kommentar in fontconfig-emoji.conf).
 export FONTCONFIG_FILE="${FONTCONFIG_FILE:-/app/etc/fonts/fonts.conf}"
 
+# Unter X11 setzt Qt die Fensterklasse sonst auf "pascom_Client", was nicht zum
+# StartupWMClass der .desktop-Datei passt -> kein Icon in der Taskleiste.
+# RESOURCE_NAME wertet nur das xcb-Plugin aus, unter Wayland ist es wirkungslos.
+export RESOURCE_NAME="${RESOURCE_NAME:-net.pascom.pascom_Client}"
+
 if [[ ! ${GIO_LAUNCH_DESKTOP:-} ]]; then
   GIO_LAUNCH_DESKTOP=/usr/lib/$(uname -m)-linux-gnu/glib-2.0/gio-launch-desktop
   [[ -e $GIO_LAUNCH_DESKTOP ]] || GIO_LAUNCH_DESKTOP=/usr/lib/glib-2.0/gio-launch-desktop

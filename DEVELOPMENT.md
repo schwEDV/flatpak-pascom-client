@@ -43,6 +43,32 @@ und es setzt die Qt- und fontconfig-Variablen. Es wird als
 `/app/bin/pascom-apprun` installiert und ist `command` im Manifest sowie
 `Exec=` in der `.desktop`-Datei.
 
+### Fensterklasse unter X11
+
+Der Original-Client setzt je nach Session eine andere Fensterklasse — sein
+`create-starter.sh` schreibt unter Wayland `StartupWMClass=net.pascom.pascom_Client`,
+unter X11 dagegen `pascom_Client`. Eine `.desktop`-Datei kann aber nur einen
+Wert enthalten; passt er nicht, ordnet die Taskleiste das Fenster keiner
+Anwendung zu und zeigt kein Icon.
+
+Gelöst über `RESOURCE_NAME` im Startskript: Die Variable wertet ausschließlich
+Qts xcb-Plugin aus und setzt dort den `res_name`-Teil von `WM_CLASS`. Unter
+Wayland ist sie wirkungslos, kann also bedingungslos gesetzt werden. Damit
+stimmt die Klasse in beiden Sitzungsarten mit der `.desktop`-Datei überein.
+
+Nachmessen lässt sich das ohne X11-Sitzung, indem man den Client über Xwayland
+startet:
+
+```bash
+flatpak run --env=QT_QPA_PLATFORM=xcb net.pascom.pascom_Client &
+for id in $(xprop -root _NET_CLIENT_LIST | grep -oE "0x[0-9a-f]+"); do
+  xprop -id $id WM_CLASS 2>/dev/null | sed 's/.*= //'
+done | grep -i pascom
+```
+
+Ohne die Variable liefert das `"pascom_Client", "pascom"`, mit ihr
+`"net.pascom.pascom_Client", "pascom"`.
+
 Achtung beim Erweitern: Das `pascom-client`-Modul kopiert den entpackten
 Tarball nach `/app/pascom_Client/`, wodurch auch die als `type: file`
 eingebundenen Repo-Dateien dort landen und anschließend per `rm -f` wieder
@@ -221,9 +247,6 @@ werden müssen.
 ## Offene Punkte
 
 - **`--device=all` eingrenzen** — braucht ein Jabra-Headset zum Verifizieren.
-- **`StartupWMClass` unter X11** — der Client setzt je nach Session eine andere
-  Fensterklasse (`pascom_Client` vs. `net.pascom.pascom_Client`), von foundata
-  unabhängig bestätigt. Die `.desktop`-Datei geht von der Wayland-Variante aus.
 - **App-ID-Namespace** — `net.pascom.pascom_Client` nutzt den Reverse-DNS-Namespace
   von pascom selbst. Bei einer Distribution ohne Autorisierung wäre ein eigener
   Namespace sauberer; betroffen sind App-ID, `.desktop`-Dateiname,

@@ -97,8 +97,6 @@ Beides im Manifest unter `url` und `sha256` eintragen, dann neu bauen.
   in den Erweiterungen aktivieren, neu anmelden. Betrifft alle
   Tray-Anwendungen unter GNOME.
   **KDE Plasma, Xfce und Cinnamon** zeigen das Icon direkt an.
-- **Unter X11 fehlt eventuell das Icon in der Taskleiste**, weil der Client
-  dort eine andere Fensterklasse setzt. Unter Wayland stimmt es.
 
 ## Weitergabe
 
