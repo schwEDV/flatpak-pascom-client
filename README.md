@@ -76,12 +76,12 @@ Beides im Manifest unter `url` und `sha256` eintragen, dann neu bauen.
 - **Jabra-Headset-Tasten ungetestet.** Rufannahme über die Headset-Taste
   konnte mangels Gerät nicht geprüft werden. Normales Headset-Audio, auch über
   Bluetooth, ist davon nicht betroffen.
-- **Unter GNOME fehlt das Tray-Icon.** GNOME bringt keinen
-  `StatusNotifierWatcher` mit, ohne den Qt-Anwendungen ihr Tray-Icon nicht
-  registrieren — der laufende Client ist dann im Panel unsichtbar und taucht
-  mangels Background-Portal auch nicht unter "Hintergrund-Apps" auf. Abhilfe:
-  `sudo dnf install gnome-shell-extension-appindicator`, aktivieren, neu
-  anmelden. Betrifft alle Tray-Anwendungen unter GNOME, nicht nur pascom.
+- **Unter GNOME braucht das Tray-Icon eine Erweiterung.** GNOME zeigt
+  Tray-Icons nicht von sich aus. Ohne sie ist der laufende Client im Panel
+  unsichtbar und taucht mangels Background-Portal auch nicht unter
+  "Hintergrund-Apps" auf. Abhilfe:
+  `sudo dnf install gnome-shell-extension-appindicator`, in den Erweiterungen
+  aktivieren, neu anmelden. Betrifft alle Tray-Anwendungen unter GNOME.
 - **Unter X11 fehlt eventuell das Icon in der Taskleiste**, weil der Client
   dort eine andere Fensterklasse setzt. Unter Wayland stimmt es.
 

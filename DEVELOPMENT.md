@@ -134,6 +134,25 @@ ein führendes `*` matcht in fontconfig nicht über Verzeichnisgrenzen.
 | `--filesystem=xdg-download` | Standard-Ablage für Downloads |
 | `--filesystem=xdg-run/pipewire-0` | unterdrückt eine Qt-Startmeldung, sonst ohne Funktion |
 | `--talk-name=org.freedesktop.Notifications` | Benachrichtigungen |
+| `--talk-name=org.kde.StatusNotifierWatcher` | Tray-Icon (siehe unten) |
+
+Ohne `org.kde.StatusNotifierWatcher` erscheint **kein Tray-Icon**, und zwar
+ohne jede Fehlermeldung: Qt meldet das Item beim Watcher an, der Aufruf wird
+von der Bus-Policy der Sandbox stillschweigend verworfen, die Anwendung läuft
+weiter. Das sieht wie ein GNOME-Problem aus, ist aber eines der Paketierung.
+Prüfen lässt es sich am Watcher selbst:
+
+```bash
+gdbus call --session --dest org.kde.StatusNotifierWatcher \
+  --object-path /StatusNotifierWatcher \
+  --method org.freedesktop.DBus.Properties.Get \
+    org.kde.StatusNotifierWatcher RegisteredStatusNotifierItems
+```
+
+Die zurückgegebenen Bus-Namen lassen sich über `busctl --user status <name>`
+einem Prozess zuordnen — bei Flatpak-Anwendungen ist das der zugehörige
+`xdg-dbus-proxy`, erkennbar an der Startzeit. Zusätzlich muss unter GNOME die
+AppIndicator-Extension laufen, sonst gibt es gar keinen Watcher.
 
 `--device=all` ist die gröbste Stelle. Der saubere Weg wäre eine gezielte
 udev-/HID-Freigabe, das lässt sich ohne Jabra-Hardware aber nicht verifizieren.
