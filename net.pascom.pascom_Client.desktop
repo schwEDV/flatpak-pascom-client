@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=pascom Client
+Comment=Start pascom Client
+Exec=pascom-apprun %U
+Icon=net.pascom.pascom_Client
+Categories=Network;InstantMessaging;
+StartupWMClass=net.pascom.pascom_Client
+Terminal=false

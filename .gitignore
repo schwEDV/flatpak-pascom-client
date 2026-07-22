@@ -1,0 +1,10 @@
+# flatpak-builder output
+/build-dir/
+/.flatpak-builder/
+/repo/
+*.flatpak
+
+# lokale Editor-/Tool-Dateien
+.idea/
+.vscode/
+*~
