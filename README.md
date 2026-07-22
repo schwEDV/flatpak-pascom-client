@@ -12,7 +12,10 @@ womit er distributionsunabhängig funktioniert, **inklusive Softphone-Anrufen**.
 
 ## Was funktioniert
 
-Getestet auf Fedora 44 (Wayland, PipeWire) mit Client 120.R5110:
+Getestet auf Fedora 44 mit GNOME (Wayland, PipeWire), Client 120.R5110. Das
+Paket ist nicht auf eine Distribution oder Desktop-Umgebung zugeschnitten —
+unter KDE Plasma, Xfce und Cinnamon sollte es ebenso laufen, dort aber
+ungetestet. Rückmeldungen dazu sind willkommen.
 
 | Funktion | Status |
 |---|---|
@@ -77,11 +80,12 @@ Beides im Manifest unter `url` und `sha256` eintragen, dann neu bauen.
   konnte mangels Gerät nicht geprüft werden. Normales Headset-Audio, auch über
   Bluetooth, ist davon nicht betroffen.
 - **Unter GNOME braucht das Tray-Icon eine Erweiterung.** GNOME zeigt
-  Tray-Icons nicht von sich aus. Ohne sie ist der laufende Client im Panel
+  Tray-Icons nicht von sich aus; der laufende Client ist dann im Panel
   unsichtbar und taucht mangels Background-Portal auch nicht unter
-  "Hintergrund-Apps" auf. Abhilfe:
-  `sudo dnf install gnome-shell-extension-appindicator`, in den Erweiterungen
+  "Hintergrund-Apps" auf. Abhilfe: Paket
+  `gnome-shell-extension-appindicator` installieren, in den Erweiterungen
   aktivieren, neu anmelden. Betrifft alle Tray-Anwendungen unter GNOME.
+  **KDE Plasma, Xfce und Cinnamon** zeigen das Icon direkt an.
 - **Unter X11 fehlt eventuell das Icon in der Taskleiste**, weil der Client
   dort eine andere Fensterklasse setzt. Unter Wayland stimmt es.
 

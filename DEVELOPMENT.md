@@ -142,8 +142,18 @@ Die Liste der D-Bus-Dienste ist vollständig: Im Binary tauchen genau
 `org.freedesktop.login1`, `org.freedesktop.Notifications`,
 `org.freedesktop.ScreenSaver` und `org.gnome.ScreenSaver` auf, dazu der
 StatusNotifierWatcher aus den Qt-Bibliotheken. `org.freedesktop.secrets` wird
-nicht verwendet, `com.canonical.AppMenu.Registrar` nur von Qt für globale
-Menüleisten — beides bleibt draußen.
+nicht verwendet. `com.canonical.AppMenu.Registrar` taucht nur in `libQt6Gui`
+auf, also in Qts generischer Implementierung: Der Client selbst enthält weder
+`QMenuBar` noch `dbusmenu`-Aufrufe, er ist eine reine QML-Anwendung ohne
+Menüleiste. Das globale Menü ist damit gegenstandslos — unabhängig von der
+Desktop-Umgebung, nicht nur unter GNOME.
+
+Nichts an der Paketierung ist auf eine bestimmte Desktop-Umgebung
+zugeschnitten: `org.kde.StatusNotifierWatcher` ist unter KDE der native
+Tray-Dienst (dort ohne Zusatz-Extension), `org.freedesktop.ScreenSaver`
+implementiert Plasma ebenfalls, und `xdgdesktopportal` liefert über
+`xdg-desktop-portal-kde` native Plasma-Dialoge. Getestet ist bislang aber nur
+GNOME.
 
 Ermitteln lässt sich das direkt am entpackten Build:
 
