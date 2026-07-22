@@ -35,6 +35,13 @@ neuere System-`libssl` gelinkt ist → `OPENSSL_3.2.0`/`3.5.0`-Symbolfehler.
 - `pascom-apprun.sh` ersetzt das Original-`AppRun` (fester Pfad `/app/pascom_Client`
   statt `SCRIPT_DIR`-Ermittlung, kein Ubuntu-20-Sonderfall mehr, da `lib-ubuntu20/`
   im Build entfernt wird).
+- **Emoji-Font:** `fontconfig-emoji.conf` wird nach `/app/etc/fonts/fonts.conf`
+  installiert und über `FONTCONFIG_FILE` im Startskript aktiviert. Fedora liefert
+  "Noto Color Emoji" als COLRv1-Datei, Flatpak blendet die Host-Fonts unter
+  `/run/host/fonts` ein, und fontconfig bevorzugt sie. Das Qt des Clients rastert
+  COLRv1 nicht — der Font meldet die Glyphe aber als vorhanden, also greift kein
+  Fallback und im Chat bleibt schlicht *nichts* stehen. Die Regel sortiert die
+  COLRv1-Datei aus, sodass die Bitmap-Variante aus der Runtime greift.
 - **`org.freedesktop.Platform` liefert seit Jahren kein Kerberos mehr**
   (bewusst entfernt, siehe Mozilla-Bugzilla #1673437). Das Runtime-`libcurl`
   ist aber mit GSSAPI/Kerberos-Support gebaut → `libgssapi_krb5.so.2` fehlt

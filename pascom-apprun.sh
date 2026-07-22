@@ -11,6 +11,10 @@ export LD_LIBRARY_PATH="${APP_DIR}/lib${LD_LIBRARY_PATH+:${LD_LIBRARY_PATH:+:}${
 export QT_QPA_PLATFORMTHEME="${QT_QPA_PLATFORMTHEME:-xdgdesktopportal}"
 export QT_PLATFORMTHEME="${QT_PLATFORMTHEME:-xdgdesktopportal}"
 
+# Host-Emoji-Font im COLRv1-Format aussortieren, sonst bleiben Emoji im Chat
+# unsichtbar (siehe Kommentar in fontconfig-emoji.conf).
+export FONTCONFIG_FILE="${FONTCONFIG_FILE:-/app/etc/fonts/fonts.conf}"
+
 if [[ ! ${GIO_LAUNCH_DESKTOP:-} ]]; then
   GIO_LAUNCH_DESKTOP=/usr/lib/$(uname -m)-linux-gnu/glib-2.0/gio-launch-desktop
   [[ -e $GIO_LAUNCH_DESKTOP ]] || GIO_LAUNCH_DESKTOP=/usr/lib/glib-2.0/gio-launch-desktop

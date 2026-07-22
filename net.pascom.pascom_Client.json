@@ -13,6 +13,7 @@
         "--device=all",
         "--talk-name=org.freedesktop.Notifications",
         "--filesystem=xdg-download",
+        "--filesystem=xdg-run/pipewire-0",
         "--env=QT_QPA_PLATFORMTHEME=xdgdesktopportal",
         "--env=QT_PLATFORMTHEME=xdgdesktopportal"
     ],
@@ -40,7 +41,7 @@
             "build-commands": [
                 "mkdir -p /app/pascom_Client",
                 "cp -a . /app/pascom_Client/",
-                "rm -f /app/pascom_Client/pascom-apprun.sh /app/pascom_Client/net.pascom.pascom_Client.desktop /app/pascom_Client/net.pascom.pascom_Client.metainfo.xml",
+                "rm -f /app/pascom_Client/pascom-apprun.sh /app/pascom_Client/net.pascom.pascom_Client.desktop /app/pascom_Client/net.pascom.pascom_Client.metainfo.xml /app/pascom_Client/fontconfig-emoji.conf",
 
                 "rm -f /app/pascom_Client/lib/libssl.so /app/pascom_Client/lib/libssl.so.3",
                 "rm -f /app/pascom_Client/lib/libcrypto.so /app/pascom_Client/lib/libcrypto.so.3",
@@ -48,6 +49,7 @@
                 "rm -rf /app/pascom_Client/lib-ubuntu20",
 
                 "install -Dm755 pascom-apprun.sh /app/bin/pascom-apprun",
+                "install -Dm644 fontconfig-emoji.conf /app/etc/fonts/fonts.conf",
 
                 "install -Dm644 client.png /app/share/icons/hicolor/256x256/apps/net.pascom.pascom_Client.png",
                 "install -Dm644 net.pascom.pascom_Client.desktop /app/share/applications/net.pascom.pascom_Client.desktop",
@@ -70,6 +72,10 @@
                 {
                     "type": "file",
                     "path": "net.pascom.pascom_Client.metainfo.xml"
+                },
+                {
+                    "type": "file",
+                    "path": "fontconfig-emoji.conf"
                 }
             ]
         }
