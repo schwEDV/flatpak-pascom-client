@@ -8,8 +8,8 @@
 APP_DIR="/app/pascom_Client"
 
 export LD_LIBRARY_PATH="${APP_DIR}/lib${LD_LIBRARY_PATH+:${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}}"
-export QT_QPA_PLATFORMTHEME="${QT_QPA_PLATFORMTHEME:-gtk3}"
-export QT_PLATFORMTHEME="${QT_PLATFORMTHEME:-gtk3}"
+export QT_QPA_PLATFORMTHEME="${QT_QPA_PLATFORMTHEME:-xdgdesktopportal}"
+export QT_PLATFORMTHEME="${QT_PLATFORMTHEME:-xdgdesktopportal}"
 
 if [[ ! ${GIO_LAUNCH_DESKTOP:-} ]]; then
   GIO_LAUNCH_DESKTOP=/usr/lib/$(uname -m)-linux-gnu/glib-2.0/gio-launch-desktop

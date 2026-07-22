@@ -110,12 +110,12 @@ Fedora 44 / PipeWire / Wayland): Media floss bidirektional, `codec=opus`,
   erfolgt (z.B. eigenes Community-Repo statt Flathub), sollte das ggf. auf
   einen eigenen Namespace geändert werden (App-ID, `.desktop`-Dateiname,
   `.metainfo.xml`-Dateiname, `launchable`-Referenz betroffen).
-- **GTK3-Theme** (`QT_QPA_PLATFORMTHEME=gtk3`) ungetestet, ob die
-  `org.gtk.Gtk3theme`-Extension automatisch mitkommt oder explizit als
-  `add-extension` deklariert werden muss. foundata nutzt stattdessen
-  `QT_QPA_PLATFORMTHEME=xdgdesktopportal` (der Client bringt dieses Qt-Plugin
-  mit) für Datei-Dialoge/Login-Browser über den Portal-Mechanismus — evtl.
-  die bessere Wahl auch fürs Flatpak, statt GTK3.
+- **Screen-Sharing / Kamera ungetestet.** Beim Start meldet Qt
+  `Failed to connect to pipewire instance`. Der Zugriff auf `/dev/video*`
+  läuft über `--device=all` und sollte funktionieren, aber alles was Qt über
+  PipeWire macht (Screen-Capture via ScreenCast-Portal) ist ungeprüft.
+  Falls Bildschirmfreigabe gebraucht wird, fehlt vermutlich
+  `--talk-name=org.freedesktop.portal.ScreenCast` bzw. ein PipeWire-Socket.
 - **Browser-Login (OAuth-Callback):** foundata dokumentiert, dass der
   Cloud-Login einen Browser öffnet und die Identity-Provider-Weiterleitung
   auf `http://localhost:3008/...` geht (temporärer OAuth-Callback-Server im

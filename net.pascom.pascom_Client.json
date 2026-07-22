@@ -13,8 +13,8 @@
         "--device=all",
         "--talk-name=org.freedesktop.Notifications",
         "--filesystem=xdg-download",
-        "--env=QT_QPA_PLATFORMTHEME=gtk3",
-        "--env=QT_PLATFORMTHEME=gtk3"
+        "--env=QT_QPA_PLATFORMTHEME=xdgdesktopportal",
+        "--env=QT_PLATFORMTHEME=xdgdesktopportal"
     ],
     "modules": [
         {
